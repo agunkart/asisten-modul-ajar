@@ -118,8 +118,8 @@
                 </div>
                 <!-- Info Pembuat Ditambahkan Di Sini -->
                 <div class="mt-10 text-center text-sm text-slate-400">
-                    <p>Dikembangkan oleh Agung Krniawan, S.Pd.</p>
-                    <p>&copy; 2025 Asisten Modul Ajar</p>
+                    <p>Dikembangkan oleh [Nama Anda/Tim Anda]</p>
+                    <p>&copy; 2024 Asisten Modul Ajar</p>
                 </div>
             </div>
         </div>
@@ -135,6 +135,12 @@
                 </div>
                 <div class="flex items-center space-x-2 md:space-x-4">
                     <span id="user-display" class="hidden md:block text-sm text-slate-600 font-medium"></span>
+                    <button id="donation-btn" title="Donasi" class="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-red-500 transition-colors">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+                    </button>
+                    <button id="settings-btn" title="Pengaturan" class="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-sky-600 transition-colors">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.532 1.532 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.532 1.532 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+                    </button>
                     <button id="set-security-btn" title="Atur Keamanan" class="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-sky-600 transition-colors">
                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
                     </button>
@@ -240,6 +246,23 @@
     </div>
 
     <!-- Modals -->
+    <div id="settings-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Pengaturan</h3>
+            <form id="settings-form" class="space-y-4">
+                <div>
+                    <label for="api-key-input" class="form-label">Gemini API Key</label>
+                    <input type="password" id="api-key-input" class="form-input" placeholder="Masukkan kunci API Anda di sini" required>
+                    <p class="text-xs text-slate-500 mt-1">Kunci API Anda disimpan dengan aman di browser Anda.</p>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancel-settings" class="bg-slate-200 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300">Batal</button>
+                    <button type="submit" class="bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-sky-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="change-password-modal" class="modal-backdrop hidden">
         <div class="modal-content">
             <h3 class="text-lg font-bold text-slate-800 mb-4">Ganti Kata Sandi</h3>
@@ -305,6 +328,34 @@
             </form>
         </div>
     </div>
+
+    <!-- Donation Modal -->
+    <div id="donation-modal" class="modal-backdrop hidden">
+        <div class="modal-content max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-800">Dukung Pengembangan Aplikasi</h3>
+                <button id="cancel-donation" class="p-1 rounded-full hover:bg-slate-200">
+                    <svg class="w-5 h-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <p class="text-sm text-slate-600 mb-4">
+                Terima kasih telah menggunakan Asisten Modul Ajar. Dukungan Anda sangat berarti untuk pemeliharaan dan pengembangan fitur-fitur baru di masa depan.
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-semibold text-slate-700 mb-2">Scan QRIS</h4>
+                    <img src="https://placehold.co/250x250/e2e8f0/334155?text=QRIS" alt="QRIS Code Placeholder" class="mx-auto rounded-lg">
+                </div>
+                <div>
+                    <h4 class="font-semibold text-slate-700 mb-2">Transfer Bank / E-Wallet</h4>
+                    <div class="text-sm space-y-1 text-slate-600">
+                        <p><strong>BCA:</strong> 1234567890 (a.n. Pengembang Aplikasi)</p>
+                        <p><strong>DANA/GoPay/OVO:</strong> 081234567890 (a.n. Pengembang Aplikasi)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <script>
         // --- DOM Elements ---
@@ -316,8 +367,13 @@
         const changePasswordBtn = document.getElementById('change-password-btn');
         const forgotPasswordLink = document.getElementById('forgot-password-link');
         const setSecurityBtn = document.getElementById('set-security-btn');
+        const donationBtn = document.getElementById('donation-btn');
+        const settingsBtn = document.getElementById('settings-btn');
         
         // Modal Elements
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsForm = document.getElementById('settings-form');
+        const cancelSettingsBtn = document.getElementById('cancel-settings');
         const changePasswordModal = document.getElementById('change-password-modal');
         const changePasswordForm = document.getElementById('change-password-form');
         const cancelChangePasswordBtn = document.getElementById('cancel-change-password');
@@ -328,6 +384,8 @@
         const forgotPasswordForm = document.getElementById('forgot-password-form');
         const cancelForgotPasswordBtn = document.getElementById('cancel-forgot-password');
         const forgotQuestionLabel = document.getElementById('forgot-question-label');
+        const donationModal = document.getElementById('donation-modal');
+        const cancelDonationBtn = document.getElementById('cancel-donation');
 
         const moduleForm = document.getElementById('module-form');
         const generateBtn = document.getElementById('generate-btn');
@@ -347,11 +405,14 @@
         let generatedMarkdown = '';
         const converter = new showdown.Converter({ tables: true, strikethrough: true, tasklists: true, simpleLineBreaks: true });
 
-        // --- Password & Security Management ---
+        // --- API Key, Password & Security Management ---
+        const API_KEY_STORAGE_KEY = 'geminiApiKey';
         const PASSWORD_KEY = 'adminPassword';
         const SECURITY_QUESTION_KEY = 'securityQuestion';
         const SECURITY_ANSWER_KEY = 'securityAnswer';
 
+        function getApiKey() { return localStorage.getItem(API_KEY_STORAGE_KEY); }
+        function setApiKey(key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); }
         function getPassword() { return localStorage.getItem(PASSWORD_KEY) || 'admin'; }
         function setPassword(newPassword) { localStorage.setItem(PASSWORD_KEY, newPassword); }
         function getSecurityQuestion() { return localStorage.getItem(SECURITY_QUESTION_KEY); }
@@ -400,7 +461,24 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // --- Change/Reset Password & Security Logic ---
+        // --- Settings, Change/Reset Password & Security Logic ---
+        settingsBtn.addEventListener('click', () => {
+            document.getElementById('api-key-input').value = getApiKey() || '';
+            showModal(settingsModal);
+        });
+        cancelSettingsBtn.addEventListener('click', () => hideModal(settingsModal));
+        settingsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const apiKey = document.getElementById('api-key-input').value;
+            if (apiKey) {
+                setApiKey(apiKey);
+                showToast('Kunci API berhasil disimpan!', 'success');
+                hideModal(settingsModal);
+            } else {
+                showToast('Kunci API tidak boleh kosong!', 'error');
+            }
+        });
+
         setSecurityBtn.addEventListener('click', () => {
             document.getElementById('security-question').value = getSecurityQuestion() || 'Siapa nama hewan peliharaan pertama Anda?';
             document.getElementById('security-answer').value = ''; // Clear previous answer for security
@@ -488,6 +566,10 @@
                 showToast('Jawaban salah!', 'error');
             }
         });
+
+        // --- Donation Modal Logic ---
+        donationBtn.addEventListener('click', () => showModal(donationModal));
+        cancelDonationBtn.addEventListener('click', () => hideModal(donationModal));
         
         // --- Toast Notification Logic ---
         function showToast(message, type = 'success') {
@@ -508,6 +590,13 @@
         moduleForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                showToast('Silakan atur Gemini API Key Anda di menu Pengaturan.', 'error');
+                showModal(settingsModal);
+                return;
+            }
+
             const formData = {
                 authorName: document.getElementById('author-name').value,
                 institution: document.getElementById('institution').value,
@@ -683,17 +772,20 @@
             let attempt = 0;
             while (attempt < maxRetries) {
                 try {
-                    const apiKey = ""; 
+                    const apiKey = getApiKey();
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                     const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
                     const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API Error: ${errorData.error.message}`);
+                    }
                     const result = await response.json();
                     if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts) {
                         return result.candidates[0].content.parts[0].text;
                     } else {
                         if (result.candidates && result.candidates[0].finishReason === 'SAFETY') {
-                             throw new Error("Konten tidak dapat dibuat karena melanggar kebijakan keselamatan. Coba ubah input Anda.");
+                             throw new Error("Konten tidak dapat dibuat karena melanggar kebijakan keselamatan.");
                         }
                         throw new Error("Respons dari AI tidak valid atau kosong.");
                     }
