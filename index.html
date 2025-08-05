@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asisten Modul Ajar | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <!-- PDF & Canvas Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .form-input, .form-textarea, .form-select {
+            @apply w-full px-4 py-2 bg-slate-100 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors duration-200;
+        }
+        .form-label {
+            @apply block mb-1.5 text-sm font-medium text-slate-700;
+        }
+        
+        /* Reverted Output Styles */
+        .prose-output h1, .prose-output h2, .prose-output h3, .prose-output h4 {
+            @apply font-bold mt-6 mb-3 border-b border-slate-200 pb-2;
+        }
+        .prose-output h1 { @apply text-2xl; }
+        .prose-output h2 { @apply text-xl text-slate-800; }
+        .prose-output h3 { @apply text-lg text-slate-700; }
+        .prose-output h4 { @apply text-base text-slate-600; }
+        .prose-output p { @apply my-3 leading-relaxed; }
+        .prose-output ul { @apply list-disc list-outside pl-5 my-3 space-y-1; }
+        .prose-output ol { @apply list-decimal list-outside pl-5 my-3 space-y-1; }
+        .prose-output table { @apply w-full my-4 border-collapse text-sm; }
+        .prose-output th, .prose-output td { @apply border border-slate-300 px-4 py-2 text-left; }
+        .prose-output th { @apply bg-slate-100 font-semibold; }
+        .prose-output blockquote { @apply border-l-4 border-sky-300 pl-4 italic my-4 text-slate-600 bg-sky-50 p-3 rounded-r-lg; }
+        .prose-output strong { @apply font-semibold; }
+
+        .toast {
+            transform: translateY(-150%);
+            transition: transform 0.5s ease-in-out;
+        }
+        .toast.show {
+            transform: translateY(0);
+        }
+        .download-btn {
+            @apply bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200 disabled:bg-slate-400;
+        }
+        .modal-backdrop {
+            @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300;
+        }
+        .modal-content {
+            @apply bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/3 transform transition-all duration-300 scale-95 opacity-0;
+        }
+        .modal-backdrop.show .modal-content {
+            @apply scale-100 opacity-100;
+        }
+    </style>
+</head>
+<body class="h-full">
+
+    <!-- Notifikasi Toast -->
+    <div id="toast" class="toast fixed top-5 right-5 bg-green-500 text-white py-2 px-5 rounded-lg shadow-lg z-50">
+        <p id="toast-message"></p>
+    </div>
+
+    <!-- Halaman Login -->
+    <div id="login-view" class="flex min-h-full flex-col md:flex-row">
+        <div class="relative hidden w-0 flex-1 lg:block">
+            <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-sky-500 to-indigo-600 flex flex-col justify-center items-center p-12 text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"></path><path d="M15 3v6h6"></path><path d="M10 16s-1 1-2 1-2-1-2-1"></path><path d="M16 16s-1 1-2 1-2-1-2-1"></path><path d="M12 11v6"></path></svg>
+                <h1 class="mt-8 text-4xl font-extrabold tracking-tight">Asisten Modul Ajar</h1>
+                <p class="mt-4 text-lg text-sky-100 max-w-sm text-center">Otomatisasi perangkat ajar Anda dengan kekuatan AI.</p>
+            </div>
+        </div>
+        <div class="flex flex-1 flex-col justify-center px-6 py-12 lg:flex-none lg:px-20 xl:px-24">
+            <div class="mx-auto w-full max-w-sm lg:w-96">
+                <div>
+                    <div class="flex justify-center lg:hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-600"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"></path><path d="M15 3v6h6"></path><path d="M10 16s-1 1-2 1-2-1-2-1"></path><path d="M16 16s-1 1-2 1-2-1-2-1"></path><path d="M12 11v6"></path></svg>
+                    </div>
+                    <h2 class="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-slate-900 lg:text-left">Asisten Modul Ajar</h2>
+                    <p class="mt-2 text-center text-sm leading-6 text-slate-600 lg:text-left">Silakan masuk untuk melanjutkan</p>
+                </div>
+                <div class="mt-10">
+                    <form id="login-form" class="space-y-6">
+                        <div>
+                            <label for="login-username" class="form-label">Nama Pengguna</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                </span>
+                                <input id="login-username" name="username" type="text" autocomplete="username" required class="form-input pl-10" value="admin">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="login-password" class="form-label">Kata Sandi</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                                </span>
+                                <input id="login-password" name="password" type="password" autocomplete="current-password" required class="form-input pl-10">
+                            </div>
+                        </div>
+                        <div class="text-sm text-right">
+                            <a href="#" id="forgot-password-link" class="font-semibold text-sky-600 hover:text-sky-500">Lupa Kata Sandi?</a>
+                        </div>
+                        <div>
+                            <button type="submit" class="flex w-full justify-center rounded-md bg-sky-600 px-3 py-2.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 transition-all duration-200">Masuk</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Info Pembuat Ditambahkan Di Sini -->
+                <div class="mt-10 text-center text-sm text-slate-400">
+                    <p>Dikembangkan oleh Agung Krniawan, S.Pd.</p>
+                    <p>&copy; 2025 Asisten Modul Ajar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aplikasi Utama (tersembunyi) -->
+    <div id="app-view" class="hidden min-h-screen">
+        <header class="bg-white shadow-sm sticky top-0 z-40">
+            <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-600"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"></path><path d="M15 3v6h6"></path><path d="M10 16s-1 1-2 1-2-1-2-1"></path><path d="M16 16s-1 1-2 1-2-1-2-1"></path><path d="M12 11v6"></path></svg>
+                    <h1 class="text-xl font-bold ml-3 text-slate-800">Asisten Modul Ajar</h1>
+                </div>
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <span id="user-display" class="hidden md:block text-sm text-slate-600 font-medium"></span>
+                    <button id="set-security-btn" title="Atur Keamanan" class="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-sky-600 transition-colors">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
+                    </button>
+                    <button id="change-password-btn" title="Ganti Kata Sandi" class="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-sky-600 transition-colors">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                    </button>
+                    <button id="logout-btn" title="Keluar" class="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-red-600 transition-colors">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="flex flex-col lg:flex-row">
+             <!-- Kolom Formulir Input -->
+            <aside class="w-full lg:w-2/5 bg-white p-6 lg:p-8 border-r border-slate-200 overflow-y-auto" style="height: calc(100vh - 4rem);">
+                <h2 class="text-xl font-bold text-slate-800">Generate dengan AI</h2>
+                <p class="text-slate-600 mt-1 mb-6">Isi formulir di bawah ini untuk membuat draf modul ajar secara otomatis.</p>
+                <form id="module-form" class="space-y-4">
+                    <!-- Form fields here -->
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2 mb-4">Identitas Modul</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div>
+                                <label for="author-name" class="form-label">Nama Penyusun</label>
+                                <input type="text" id="author-name" class="form-input" placeholder="Contoh: Budi Santoso, S.Pd." required>
+                            </div>
+                            <div>
+                                <label for="institution" class="form-label">Instansi</label>
+                                <input type="text" id="institution" class="form-input" placeholder="Contoh: SMP Negeri 1 Harapan" required>
+                            </div>
+                            <div>
+                                <label for="level" class="form-label">Jenjang</label>
+                                <select id="level" class="form-select" required>
+                                    <option value="PAUD">PAUD</option>
+                                    <option value="SD">SD</option>
+                                    <option value="SMP" selected>SMP</option>
+                                    <option value="SMA">SMA</option>
+                                    <option value="SMK">SMK</option>
+                                    <option value="SLB">SLB</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="subject" class="form-label">Mata Pelajaran</label>
+                                <input type="text" id="subject" class="form-input" placeholder="Contoh: Ilmu Pengetahuan Alam" required>
+                            </div>
+                            <div>
+                                <label for="phase-class" class="form-label">Fase / Kelas</label>
+                                <input type="text" id="phase-class" class="form-input" placeholder="Contoh: Fase D / Kelas VIII" required>
+                            </div>
+                            <div>
+                                <label for="time-allocation" class="form-label">Alokasi Waktu</label>
+                                <input type="text" id="time-allocation" class="form-input" placeholder="Contoh: 2 x 40 menit" required>
+                            </div>
+                        </div>
+                         <div class="mt-4">
+                            <label for="topic" class="form-label">Topik Utama</label>
+                            <input type="text" id="topic" class="form-input" placeholder="Contoh: Getaran dan Gelombang" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2 mb-4">Komponen Inti</h2>
+                        <div>
+                            <label for="learning-outcomes" class="form-label">Capaian Pembelajaran (CP)</label>
+                            <textarea id="learning-outcomes" rows="4" class="form-textarea" placeholder="Salin-tempel Capaian Pembelajaran dari kurikulum Anda di sini." required></textarea>
+                        </div>
+                        <div class="mt-4">
+                            <label for="learning-objectives" class="form-label">Tujuan Pembelajaran (TP)</label>
+                            <textarea id="learning-objectives" rows="4" class="form-textarea" placeholder="Tuliskan poin-poin tujuan pembelajaran yang ingin dicapai." required></textarea>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="generate-btn" class="w-full bg-sky-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow-md">
+                        <svg id="generate-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>
+                        <span id="btn-text">Buat Modul Ajar</span>
+                        <div id="loader" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    </button>
+                </form>
+            </aside>
+            <!-- Kolom Output Modul -->
+            <main class="w-full lg:w-3/5 p-6 lg:p-8 bg-slate-50 overflow-y-auto" style="height: calc(100vh - 4rem);">
+                <div id="output-container" class="bg-white p-8 rounded-xl shadow-sm min-h-full">
+                    <div id="placeholder" class="text-center text-slate-500 flex flex-col items-center justify-center h-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-4 text-slate-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                        <h2 class="text-xl font-semibold">Modul Ajar Anda Akan Muncul di Sini</h2>
+                        <p class="mt-2 max-w-md">Isi formulir di sebelah kiri dan klik "Buat Modul Ajar" untuk memulai.</p>
+                    </div>
+                    <div id="output-content" class="prose-output max-w-none hidden"></div>
+                     <div id="output-actions" class="mt-6 text-right hidden">
+                        <div class="flex items-center justify-end space-x-3">
+                            <button id="copy-btn" class="bg-slate-200 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 transition-all duration-200">
+                                Salin Teks
+                            </button>
+                            <button id="pdf-a4-btn" class="download-btn">Unduh PDF (A4)</button>
+                            <button id="pdf-f4-btn" class="download-btn">Unduh PDF (F4)</button>
+                            <button id="doc-btn" class="download-btn">Unduh DOC</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="change-password-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Ganti Kata Sandi</h3>
+            <form id="change-password-form" class="space-y-4">
+                <div>
+                    <label for="old-password" class="form-label">Kata Sandi Lama</label>
+                    <input type="password" id="old-password" class="form-input" required>
+                </div>
+                <div>
+                    <label for="new-password" class="form-label">Kata Sandi Baru</label>
+                    <input type="password" id="new-password" class="form-input" required>
+                </div>
+                <div>
+                    <label for="confirm-password" class="form-label">Konfirmasi Kata Sandi Baru</label>
+                    <input type="password" id="confirm-password" class="form-input" required>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancel-change-password" class="bg-slate-200 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300">Batal</button>
+                    <button type="submit" class="bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-sky-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="set-security-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Atur Pertanyaan Keamanan</h3>
+            <p class="text-sm text-slate-600 mb-4">Ini akan digunakan untuk mereset kata sandi jika Anda lupa.</p>
+            <form id="set-security-form" class="space-y-4">
+                <div>
+                    <label for="security-question" class="form-label">Pilih Pertanyaan</label>
+                    <select id="security-question" class="form-select" required>
+                        <option value="Siapa nama hewan peliharaan pertama Anda?">Siapa nama hewan peliharaan pertama Anda?</option>
+                        <option value="Apa nama sekolah dasar Anda?">Apa nama sekolah dasar Anda?</option>
+                        <option value="Siapa nama gadis ibu kandung Anda?">Siapa nama gadis ibu kandung Anda?</option>
+                        <option value="Di kota mana Anda lahir?">Di kota mana Anda lahir?</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="security-answer" class="form-label">Jawaban Anda</label>
+                    <input type="text" id="security-answer" class="form-input" required>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancel-set-security" class="bg-slate-200 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300">Batal</button>
+                    <button type="submit" class="bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-sky-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="forgot-password-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Lupa Kata Sandi</h3>
+            <form id="forgot-password-form" class="space-y-4">
+                <div>
+                    <label id="forgot-question-label" for="forgot-answer" class="form-label">Pertanyaan Keamanan</label>
+                    <input type="text" id="forgot-answer" class="form-input" placeholder="Masukkan jawaban Anda" required>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancel-forgot-password" class="bg-slate-200 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300">Batal</button>
+                    <button type="submit" class="bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-sky-700">Reset Kata Sandi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // --- DOM Elements ---
+        const loginView = document.getElementById('login-view');
+        const appView = document.getElementById('app-view');
+        const loginForm = document.getElementById('login-form');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userDisplay = document.getElementById('user-display');
+        const changePasswordBtn = document.getElementById('change-password-btn');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const setSecurityBtn = document.getElementById('set-security-btn');
+        
+        // Modal Elements
+        const changePasswordModal = document.getElementById('change-password-modal');
+        const changePasswordForm = document.getElementById('change-password-form');
+        const cancelChangePasswordBtn = document.getElementById('cancel-change-password');
+        const setSecurityModal = document.getElementById('set-security-modal');
+        const setSecurityForm = document.getElementById('set-security-form');
+        const cancelSetSecurityBtn = document.getElementById('cancel-set-security');
+        const forgotPasswordModal = document.getElementById('forgot-password-modal');
+        const forgotPasswordForm = document.getElementById('forgot-password-form');
+        const cancelForgotPasswordBtn = document.getElementById('cancel-forgot-password');
+        const forgotQuestionLabel = document.getElementById('forgot-question-label');
+
+        const moduleForm = document.getElementById('module-form');
+        const generateBtn = document.getElementById('generate-btn');
+        const btnText = document.getElementById('btn-text');
+        const generateIcon = document.getElementById('generate-icon');
+        const loader = document.getElementById('loader');
+        const placeholder = document.getElementById('placeholder');
+        const outputContent = document.getElementById('output-content');
+        const outputActions = document.getElementById('output-actions');
+        const copyBtn = document.getElementById('copy-btn');
+        const pdfA4Btn = document.getElementById('pdf-a4-btn');
+        const pdfF4Btn = document.getElementById('pdf-f4-btn');
+        const docBtn = document.getElementById('doc-btn');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+
+        let generatedMarkdown = '';
+        const converter = new showdown.Converter({ tables: true, strikethrough: true, tasklists: true, simpleLineBreaks: true });
+
+        // --- Password & Security Management ---
+        const PASSWORD_KEY = 'adminPassword';
+        const SECURITY_QUESTION_KEY = 'securityQuestion';
+        const SECURITY_ANSWER_KEY = 'securityAnswer';
+
+        function getPassword() { return localStorage.getItem(PASSWORD_KEY) || 'admin'; }
+        function setPassword(newPassword) { localStorage.setItem(PASSWORD_KEY, newPassword); }
+        function getSecurityQuestion() { return localStorage.getItem(SECURITY_QUESTION_KEY); }
+        function setSecurityQuestion(question) { localStorage.setItem(SECURITY_QUESTION_KEY, question); }
+        function getSecurityAnswer() { return localStorage.getItem(SECURITY_ANSWER_KEY); }
+        function setSecurityAnswer(answer) { localStorage.setItem(SECURITY_ANSWER_KEY, answer.toLowerCase()); } // Store answer in lowercase
+
+        // Initialize default password if not set
+        if (!localStorage.getItem(PASSWORD_KEY)) {
+            localStorage.setItem(PASSWORD_KEY, 'admin');
+        }
+
+        // --- Authentication Logic ---
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = loginForm.username.value;
+            const password = loginForm.password.value;
+            const storedPassword = getPassword();
+
+            if (username === 'admin' && password === storedPassword) {
+                loginView.classList.add('hidden');
+                appView.classList.remove('hidden');
+                userDisplay.textContent = `Selamat datang, ${username}`;
+                showToast('Login berhasil!', 'success');
+            } else {
+                showToast('Nama pengguna atau kata sandi salah!', 'error');
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            appView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+            loginForm.reset();
+            document.getElementById('login-username').value = 'admin';
+            document.getElementById('login-password').value = '';
+            showToast('Anda telah keluar.', 'success');
+        });
+
+        // --- Modals General ---
+        function showModal(modal) {
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+        function hideModal(modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        // --- Change/Reset Password & Security Logic ---
+        setSecurityBtn.addEventListener('click', () => {
+            document.getElementById('security-question').value = getSecurityQuestion() || 'Siapa nama hewan peliharaan pertama Anda?';
+            document.getElementById('security-answer').value = ''; // Clear previous answer for security
+            showModal(setSecurityModal);
+        });
+        
+        cancelSetSecurityBtn.addEventListener('click', () => hideModal(setSecurityModal));
+
+        setSecurityForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const question = document.getElementById('security-question').value;
+            const answer = document.getElementById('security-answer').value;
+            if (!answer) {
+                showToast('Jawaban tidak boleh kosong!', 'error');
+                return;
+            }
+            setSecurityQuestion(question);
+            setSecurityAnswer(answer);
+            showToast('Pertanyaan keamanan berhasil disimpan!', 'success');
+            hideModal(setSecurityModal);
+        });
+
+        changePasswordBtn.addEventListener('click', () => {
+            showModal(changePasswordModal);
+        });
+
+        cancelChangePasswordBtn.addEventListener('click', () => {
+            hideModal(changePasswordModal);
+            changePasswordForm.reset();
+        });
+
+        changePasswordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const oldPassword = document.getElementById('old-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const storedPassword = getPassword();
+
+            if (oldPassword !== storedPassword) {
+                showToast('Kata sandi lama salah!', 'error');
+                return;
+            }
+            if (newPassword.length < 4) {
+                showToast('Kata sandi baru minimal 4 karakter!', 'error');
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                showToast('Konfirmasi kata sandi baru tidak cocok!', 'error');
+                return;
+            }
+
+            setPassword(newPassword);
+            showToast('Kata sandi berhasil diubah!', 'success');
+            hideModal(changePasswordModal);
+            changePasswordForm.reset();
+        });
+
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const question = getSecurityQuestion();
+            if (!question) {
+                showToast('Anda belum mengatur pertanyaan keamanan. Silakan login dan atur terlebih dahulu.', 'error');
+                return;
+            }
+            forgotQuestionLabel.textContent = question;
+            showModal(forgotPasswordModal);
+        });
+        
+        cancelForgotPasswordBtn.addEventListener('click', () => {
+            hideModal(forgotPasswordModal);
+            forgotPasswordForm.reset();
+        });
+
+        forgotPasswordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const answer = document.getElementById('forgot-answer').value.toLowerCase();
+            const storedAnswer = getSecurityAnswer();
+
+            if (answer === storedAnswer) {
+                setPassword('admin');
+                showToast('Berhasil! Kata sandi telah direset ke "admin".', 'success');
+                hideModal(forgotPasswordModal);
+                forgotPasswordForm.reset();
+            } else {
+                showToast('Jawaban salah!', 'error');
+            }
+        });
+        
+        // --- Toast Notification Logic ---
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            toast.className = 'toast fixed top-5 right-5 text-white py-2 px-5 rounded-lg shadow-lg z-50'; // Reset classes
+            if (type === 'error') {
+                toast.classList.add('bg-red-500');
+            } else {
+                toast.classList.add('bg-green-500');
+            }
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- Module Generator Logic ---
+        moduleForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                authorName: document.getElementById('author-name').value,
+                institution: document.getElementById('institution').value,
+                level: document.getElementById('level').value,
+                subject: document.getElementById('subject').value,
+                phaseClass: document.getElementById('phase-class').value,
+                timeAllocation: document.getElementById('time-allocation').value,
+                topic: document.getElementById('topic').value,
+                learningOutcomes: document.getElementById('learning-outcomes').value,
+                learningObjectives: document.getElementById('learning-objectives').value,
+            };
+
+            setLoading(true);
+            placeholder.classList.add('hidden');
+            outputContent.classList.add('hidden');
+            outputActions.classList.add('hidden');
+
+            try {
+                const prompt = createPrompt(formData);
+                const responseText = await generateContentWithRetry(prompt);
+                generatedMarkdown = responseText;
+                const html = converter.makeHtml(generatedMarkdown);
+                outputContent.innerHTML = html;
+                outputContent.classList.remove('hidden');
+                outputActions.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error:', error);
+                showToast(error.message || 'Gagal menghubungi AI.', 'error');
+                placeholder.classList.remove('hidden');
+            } finally {
+                setLoading(false);
+            }
+        });
+        
+        function createPrompt(data) {
+             return `
+            Anda adalah seorang ahli perancang kurikulum dan instruksional yang berpengalaman di Indonesia. Tugas Anda adalah membuat draf Modul Ajar yang lengkap, terstruktur, dan sesuai dengan Kurikulum Merdeka berdasarkan informasi yang diberikan.
+
+            Berikut adalah detailnya:
+
+            **1. IDENTITAS MODUL:**
+            * Nama Penyusun: ${data.authorName}
+            * Instansi: ${data.institution}
+            * Jenjang: ${data.level}
+            * Mata Pelajaran: ${data.subject}
+            * Fase/Kelas: ${data.phaseClass}
+            * Alokasi Waktu: ${data.timeAllocation}
+            * Topik Utama: ${data.topic}
+
+            **2. KOMPONEN INTI YANG DIKETAHUI:**
+            * Capaian Pembelajaran (CP): ${data.learningOutcomes}
+            * Tujuan Pembelajaran (TP):
+                ${data.learningObjectives}
+
+            **TUGAS ANDA:**
+            Lengkapi kerangka Modul Ajar berikut ini dengan detail yang relevan, kreatif, dan praktis. Pastikan semua bagian terisi dengan baik dan bahasanya sesuai untuk guru. Gunakan format Markdown yang rapi dan profesional. Buat tabel untuk kegiatan pembelajaran.
+
+            ---
+
+            ### **MODUL AJAR**
+            **${data.topic.toUpperCase()}**
+
+            ---
+
+            #### **A. INFORMASI UMUM / IDENTITAS**
+            * **Nama Penyusun:** ${data.authorName}
+            * **Instansi:** ${data.institution}
+            * **Jenjang Sekolah:** ${data.level}
+            * **Mata Pelajaran:** ${data.subject}
+            * **Fase / Kelas:** ${data.phaseClass}
+            * **Topik:** ${data.topic}
+            * **Alokasi Waktu:** ${data.timeAllocation}
+
+            #### **B. KOMPONEN INTI**
+
+            **1. Capaian Pembelajaran (CP)**
+            ${data.learningOutcomes}
+
+            **2. Tujuan Pembelajaran (TP)**
+            ${data.learningObjectives}
+
+            **3. Pemahaman Bermakna**
+            (Buatkan 1-2 kalimat yang kuat dan inspiratif, yang menghubungkan topik dengan pengalaman atau kehidupan nyata siswa.)
+
+            **4. Pertanyaan Pemantik**
+            (Buatkan 2-3 pertanyaan terbuka yang memprovokasi rasa ingin tahu siswa dan mengarahkan mereka ke topik.)
+
+            **5. Sarana dan Prasarana**
+            * **Media:** (Sebutkan media digital atau cetak yang relevan.)
+            * **Alat dan Bahan:** (Sebutkan alat dan bahan praktis untuk eksperimen.)
+            * **Sumber Belajar:** (Sebutkan sumber lain seperti buku atau situs web.)
+
+            **6. Pendekatan, Model, dan Metode Pembelajaran**
+            * **Pendekatan:** (Pilih yang sesuai, contoh: Saintifik)
+            * **Model:** (Pilih yang sesuai, contoh: Discovery Learning, Problem-Based Learning)
+            * **Metode:** (Pilih yang sesuai, contoh: Eksperimen, Diskusi Kelompok, Tanya Jawab)
+
+            **7. Kegiatan Pembelajaran**
+            | Tahapan | Aktivitas Pembelajaran | Estimasi Waktu |
+            | :--- | :--- | :--- |
+            | **Pendahuluan** | (Rancang aktivitas pembuka: salam, doa, apersepsi, penyampaian tujuan & pertanyaan pemantik) | (Contoh: 10 menit) |
+            | **Inti** | (Rancang aktivitas inti pembelajaran sesuai model yang dipilih. Deskripsikan langkah-langkah guru dan siswa secara jelas.) | (Contoh: 55 menit) |
+            | **Penutup** | (Rancang aktivitas penutup: kesimpulan, refleksi, asesmen formatif singkat, info pertemuan selanjutnya, doa) | (Contoh: 15 menit) |
+
+            **8. Asesmen / Penilaian**
+            * **Asesmen Diagnostik (Awal):** (Jelaskan cara melakukan asesmen awal.)
+            * **Asesmen Formatif (Proses):** (Jelaskan cara melakukan asesmen selama pembelajaran.)
+            * **Asesmen Sumatif (Akhir):** (Jelaskan cara melakukan asesmen di akhir.)
+
+            **9. Refleksi Guru dan Siswa**
+            * **Refleksi Siswa:** (Buatkan 2-3 pertanyaan reflektif untuk siswa.)
+            * **Refleksi Guru:** (Buatkan 2-3 pertanyaan reflektif untuk guru.)
+
+            **10. Pengayaan dan Remedial**
+            * **Pengayaan:** (Berikan ide kegiatan pengayaan untuk siswa yang telah mencapai TP.)
+            * **Remedial:** (Berikan ide kegiatan remedial untuk siswa yang belum mencapai TP.)
+
+            ---
+            #### **C. LAMPIRAN**
+
+            **1. Lembar Kerja Peserta Didik (LKPD)**
+            (Buatkan contoh LKPD yang rinci untuk salah satu kegiatan inti, misalnya eksperimen. Gunakan format tabel untuk langkah kerja dan tabel pengamatan. Sertakan judul, tujuan, alat & bahan, langkah kerja, tabel data, dan beberapa pertanyaan analisis. Gunakan placeholder seperti '[Gambar...]' untuk menyarankan di mana guru bisa menambahkan gambar.)
+            *Contoh Struktur LKPD:*
+            **LKPD 1: Eksperimen Sederhana**
+            * **Tujuan:** ...
+            * **Alat dan Bahan:** ...
+            * **Langkah Kerja:**
+                | No. | Kegiatan | Gambar |
+                |:---:|:---|:---|
+                | 1. | Susunlah alat seperti pada gambar. | [Gambar susunan alat eksperimen] |
+                | 2. | Lakukan pengukuran sesuai instruksi. | |
+                | 3. | Catat hasilnya pada tabel pengamatan. | |
+            * **Tabel Pengamatan:**
+                | Percobaan | Variabel 1 | Variabel 2 | Hasil |
+                |:---:|:---|:---|:---|
+                | 1 | ... | ... | ... |
+                | 2 | ... | ... | ... |
+            * **Pertanyaan Analisis:**
+                1. Berdasarkan data, apa hubungan antara Variabel 1 dan Variabel 2?
+                2. Apa kesimpulan dari percobaan yang telah kamu lakukan?
+
+            **2. Instrumen Penilaian (Contoh Kuis Formatif)**
+            (Buatkan contoh kuis formatif yang rinci, terdiri dari 5-10 soal untuk mengukur ketercapaian Tujuan Pembelajaran. Soal bisa berupa campuran pilihan ganda dan esai singkat. Sertakan juga kunci jawabannya di bagian akhir.)
+            *Contoh Struktur Kuis:*
+            **Kuis Singkat: ${data.topic}**
+            * **Petunjuk:** Pilihlah jawaban yang paling tepat atau isilah dengan jawaban yang benar!
+            * **Soal Pilihan Ganda:**
+                1. Pertanyaan 1...
+                   a. Opsi A
+                   b. Opsi B
+                   c. Opsi C
+                   d. Opsi D
+                2. ... (dan seterusnya hingga 5-7 soal)
+            * **Soal Esai Singkat:**
+                8. Pertanyaan esai 1...
+                9. Pertanyaan esai 2...
+                10. ... (dan seterusnya hingga 2-3 soal)
+            * **Kunci Jawaban:**
+                1. B
+                2. ...
+                8. Jawaban singkat untuk esai 1...
+                9. ...
+
+            **3. Bahan Bacaan Guru & Siswa**
+            (Sebutkan materi ringkas atau poin-poin kunci yang bisa menjadi bahan bacaan.)
+
+            **4. Rubrik Penilaian**
+            (Sebutkan contoh rubrik penilaian lain, misalnya untuk presentasi atau laporan praktikum.)
+            `;
+        }
+        
+        async function generateContentWithRetry(prompt, maxRetries = 3) {
+            let attempt = 0;
+            while (attempt < maxRetries) {
+                try {
+                    const apiKey = ""; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                    const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        if (result.candidates && result.candidates[0].finishReason === 'SAFETY') {
+                             throw new Error("Konten tidak dapat dibuat karena melanggar kebijakan keselamatan. Coba ubah input Anda.");
+                        }
+                        throw new Error("Respons dari AI tidak valid atau kosong.");
+                    }
+                } catch (error) {
+                    attempt++;
+                    if (attempt >= maxRetries) throw error;
+                    await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+                }
+            }
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                generateBtn.disabled = true;
+                btnText.classList.add('hidden');
+                generateIcon.classList.add('hidden');
+                loader.classList.remove('hidden');
+            } else {
+                generateBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                generateIcon.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        }
+        
+        copyBtn.addEventListener('click', () => {
+            const textarea = document.createElement('textarea');
+            textarea.value = generatedMarkdown;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                copyBtn.textContent = 'Berhasil Disalin!';
+                setTimeout(() => { copyBtn.textContent = 'Salin Teks'; }, 2000);
+            } catch (err) {
+                copyBtn.textContent = 'Gagal Menyalin';
+                setTimeout(() => { copyBtn.textContent = 'Salin Teks'; }, 2000);
+            }
+            document.body.removeChild(textarea);
+        });
+
+        // --- Download Logic ---
+        pdfA4Btn.addEventListener('click', () => downloadPDF('a4'));
+        pdfF4Btn.addEventListener('click', () => downloadPDF('f4'));
+        docBtn.addEventListener('click', downloadDOC);
+
+        function downloadPDF(size = 'a4') {
+            const { jsPDF } = window.jspdf;
+            const output = document.getElementById('output-content');
+            const topic = document.getElementById('topic').value || 'Tanpa Judul';
+            const filename = `Modul Ajar - ${topic} (${size.toUpperCase()}).pdf`;
+            
+            const btn = document.getElementById(`pdf-${size}-btn`);
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Memproses...';
+
+            html2canvas(output, { scale: 2, useCORS: true }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210; // A4/F4 width in mm
+                const pageHeight = size === 'f4' ? 330 : 297;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+
+                const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: size });
+                let position = 10; // Top margin
+                const margin = 15; // Left-right margin
+
+                doc.addImage(imgData, 'PNG', margin, position, imgWidth - (margin * 2), imgHeight);
+                heightLeft -= (pageHeight - margin);
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight + margin;
+                    doc.addPage();
+                    doc.addImage(imgData, 'PNG', margin, position, imgWidth - (margin * 2), imgHeight);
+                    heightLeft -= (pageHeight - margin);
+                }
+
+                doc.save(filename);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }).catch(err => {
+                console.error("Error generating PDF:", err);
+                showToast('Gagal membuat PDF.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        }
+
+        function downloadDOC() {
+            const topic = document.getElementById('topic').value || 'Tanpa Judul';
+            const filename = `Modul Ajar - ${topic}.doc`;
+            const content = document.getElementById('output-content').innerHTML;
+
+            const style = `
+                @page { size: A4; margin: 2.5cm; }
+                body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid black; padding: 8px; }
+                h1, h2, h3, h4 { font-family: 'Arial', sans-serif; }
+                ul { list-style-type: disc; margin-left: 20px; }
+                ol { list-style-type: decimal; margin-left: 20px; }
+            `;
+
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>${style}</style>
+                </head>
+                <body>${content}</body>
+                </html>
+            `;
+
+            const blob = new Blob(['\ufeff', html], {
+                type: 'application/msword'
+            });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+    </script>
+</body>
+</html>
